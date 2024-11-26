@@ -11,6 +11,7 @@ public class Client
     public string UserAgent { get; }
     public string ApiUrl { get; }
     public string Authorization { get; }
+    public string AccessToken { get; }
 
     /// <summary>
     /// Constructor
@@ -19,16 +20,14 @@ public class Client
     /// <param name="secretKey">Secret web api key</param>
     /// <param name="apiUrl">API URL</param>
     /// <param name="userAgent">Agent name</param>
+    /// <param name="accessToken">Access token</param>
     public Client(
-        string shopId,
-        string secretKey,
+        string shopId = null,
+        string secretKey = null,
         string apiUrl = "https://api.yookassa.ru/v3/",
-        string userAgent = "Yandex.Checkout.V3 .NET Client")
+        string userAgent = "Yandex.Checkout.V3 .NET Client",
+        string accessToken = null)
     {
-        if (string.IsNullOrWhiteSpace(shopId))
-            throw new ArgumentNullException(nameof(shopId));
-        if (string.IsNullOrWhiteSpace(secretKey))
-            throw new ArgumentNullException(nameof(secretKey));
         if (string.IsNullOrWhiteSpace(apiUrl))
             throw new ArgumentNullException(nameof(apiUrl));
         if (!Uri.TryCreate(apiUrl, UriKind.Absolute, out Uri _))
@@ -38,7 +37,16 @@ public class Client
         if (!ApiUrl.EndsWith("/"))
             ApiUrl = apiUrl + "/";
         UserAgent = userAgent;
-        Authorization = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(shopId + ":" + secretKey));
+
+        if (!string.IsNullOrWhiteSpace(accessToken))
+        {
+            AccessToken = accessToken;
+            Authorization = "Bearer " + accessToken;
+        }
+        else
+        {
+            Authorization = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(shopId + ":" + secretKey));
+        }
     }
 
     #region Sync
